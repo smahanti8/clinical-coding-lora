@@ -1,0 +1,28 @@
+code,description,domain
+E11.9,Type 2 diabetes mellitus without complications,endocrine
+E11.65,Type 2 diabetes mellitus with hyperglycemia,endocrine
+E11.21,Type 2 diabetes mellitus with diabetic nephropathy,endocrine
+E11.22,Type 2 diabetes mellitus with diabetic chronic kidney disease,endocrine
+E11.29,Type 2 diabetes mellitus with other diabetic kidney complication,endocrine
+E11.36,Type 2 diabetes mellitus with diabetic cataract,endocrine
+E11.40,"Type 2 diabetes mellitus with diabetic neuropathy, unspecified",endocrine
+E11.42,Type 2 diabetes mellitus with diabetic polyneuropathy,endocrine
+E11.51,Type 2 diabetes mellitus with diabetic peripheral angiopathy without gangrene,endocrine
+J18.9,"Pneumonia, unspecified organism",respiratory
+J15.9,Unspecified bacterial pneumonia,respiratory
+J44.1,Chronic obstructive pulmonary disease with (acute) exacerbation,respiratory
+J44.0,Chronic obstructive pulmonary disease with (acute) lower respiratory infection,respiratory
+J45.909,"Unspecified asthma, uncomplicated",respiratory
+J45.901,Unspecified asthma with (acute) exacerbation,respiratory
+J20.9,"Acute bronchitis, unspecified",respiratory
+J96.01,Acute respiratory failure with hypoxia,respiratory
+J96.02,Acute respiratory failure with hypercapnia,respiratory
+I10,Essential (primary) hypertension,circulatory
+I21.9,"Acute myocardial infarction, unspecified",circulatory
+I25.9,"Chronic ischemic heart disease, unspecified",circulatory
+I25.10,Atherosclerotic heart disease of native coronary artery without angina pectoris,circulatory
+I50.9,"Heart failure, unspecified",circulatory
+I11.0,Hypertensive heart disease with heart failure,circulatory
+I48.91,Unspecified atrial fibrillation,circulatory
+I48.0,Paroxysmal atrial fibrillation,circulatory
+I48.92,Unspecified atrial flutter,circulatory
