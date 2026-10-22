@@ -1,0 +1,110 @@
+# clinical-coding-lora
+
+A small, reproducible QLoRA fine-tuning demonstration for clinical coding.
+**This is a demonstration on synthetic data, not a clinically validated
+tool.** It makes no claim about real-world coding accuracy; the point is
+to show a rigorous, honestly-reported fine-tuning and evaluation pipeline.
+
+## Task
+
+Given a synthetic discharge-summary-style note, output the principal
+diagnosis as a single ICD-10-CM code chosen from a closed set of 27 codes
+spanning three domains (endocrine, respiratory, circulatory). See
+`data/icd10cm_subset.csv` and `data/PROVENANCE.md` for the exact codes,
+descriptions and their CMS source.
+
+## Why the numbers below should not be over-trusted
+
+The notes are generated from templates (`src/clinical_coding/generator.py`),
+not written by clinicians or sampled from real records. Template-generated
+text is systematically easier than real notes: phrasing is far less varied,
+there is no real-world noise, and a model can pick up on template artefacts
+that would never appear in a real discharge summary. **In-distribution
+accuracy below is inflated relative to what any of these approaches would
+achieve on real notes.** The held-out-template-family test set
+(`test_heldout_family`) exists specifically to expose memorisation of
+template artefacts: its two phrasing styles (`plan`, `chief_complaint`)
+never appear anywhere in training. See `DECISIONS.md` for a concrete case
+where this caught a real bug in an earlier version of the generator.
+
+## Results
+
+All rows measured with `seed=0`, `n_train=2000`, `n_test_id=300`,
+`n_test_ood=300` (see `scripts/eval_llm.py::EvalConfig` defaults). CPU rows
+were measured in this repository; run with:
+
+```bash
+python -m pytest -q
+```
+
+| Model | Split | Accuracy | 95% CI | Macro-F1 | Invalid-output rate |
+|---|---|---|---|---|---|
+| Majority class | in-distribution | 2.3% | [0.7%, 4.3%] | 0.002 | 0.0% |
+| Majority class | held-out family | 4.3% | [2.3%, 6.7%] | 0.003 | 0.0% |
+| TF-IDF + logistic regression | in-distribution | 47.7% | [42.3%, 53.0%] | 0.427 | 0.0% |
+| TF-IDF + logistic regression | held-out family | 54.3% | [48.7%, 60.0%] | 0.498 | 0.0% |
+| Phi-3-mini-4k-instruct, zero-shot | in-distribution | not run yet | - | - | - |
+| Phi-3-mini-4k-instruct, zero-shot | held-out family | not run yet | - | - | - |
+| Phi-3-mini-4k-instruct + QLoRA adapter | in-distribution | not run yet | - | - | - |
+| Phi-3-mini-4k-instruct + QLoRA adapter | held-out family | not run yet | - | - | - |
+
+TF-IDF is a linear bag-of-words classifier with no notion of negation or
+context; if the fine-tuned adapter's accuracy turns out close to the TF-IDF
+number above once it is actually run, that means the fine-tune is mostly
+picking up on the same surface word-presence signal as the baseline, not
+genuinely reading the note - this comparison is the reason the baseline is
+required here rather than optional.
+
+The "not run yet" rows will never be estimated or invented; they are filled
+in only by actually running `docs/RUNNING_ON_COLAB.md` end to end and
+pasting the resulting `results.json` numbers here.
+
+## Base model
+
+`microsoft/Phi-3-mini-4k-instruct`
+(<https://huggingface.co/microsoft/Phi-3-mini-4k-instruct>), MIT-licensed
+per its `LICENSE` file on the Hugging Face model card (fetched and
+confirmed 2026-09-27). LoRA target modules (`qkv_proj`, `o_proj`,
+`gate_up_proj`, `down_proj`) were verified directly against that model's
+`modeling_phi3.py`, not guessed from convention.
+
+## Evaluation harness
+
+`src/clinical_coding/metrics.py` computes exact-match accuracy, macro-F1,
+per-code precision/recall, a full confusion matrix, an invalid-output rate
+(model output that is not a code in the label set - the characteristic
+failure mode of generative coding), and a bootstrap 95% CI on accuracy.
+`src/clinical_coding/parsing.py` normalises raw model output (accepts a
+code with or without the decimal point, rejects anything else, including a
+valid code embedded in extra text).
+
+## Running the GPU scripts
+
+`scripts/train_qlora.py` and `scripts/eval_llm.py` are GPU-only and were
+never executed in this repository's CPU environment - only their control
+flow is tested here, against a stub model (see
+`tests/test_train_qlora_stub.py`, `tests/test_eval_llm_stub.py`). To
+actually run them, follow `docs/RUNNING_ON_COLAB.md`.
+
+## Repository layout
+
+```
+data/            ICD-10-CM subset + provenance
+src/clinical_coding/  generator, split, labels, metrics, parsing, baselines, prompting
+scripts/         GPU training and evaluation entry points
+tests/           full CPU test suite (pytest)
+docs/            Colab runbook
+```
+
+## Running the tests
+
+Create and activate a virtual environment first (`python -m venv .venv`), then:
+
+```bash
+python -m pip install -r requirements.txt
+python -m pytest -q
+```
+
+See `DECISIONS.md` for the reasoning behind the label set, the split, the
+baseline choice, and a leakage bug the split/baseline combination caught
+during development.
