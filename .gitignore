@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# downloaded/raw source files (provenance recorded in data/PROVENANCE.md instead)
+data/raw/
+*.zip
+
+# training artifacts (never committed; produced only by scripts/train_qlora.py on GPU)
+outputs/
+adapters/
+*.safetensors
