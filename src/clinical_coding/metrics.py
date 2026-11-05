@@ -60,7 +60,6 @@ def evaluate(
     for code in labels:
         true_positive = confusion[code][code]
         total_true = support[code]
-        false_negative = total_true - true_positive
         false_positive = sum(confusion[t][code] for t in labels) - true_positive
         per_code_precision[code] = (
             true_positive / (true_positive + false_positive)
